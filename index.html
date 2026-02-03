@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kerala Energy Calculator</title>
+    <style>
+        :root {
+            --color-bg-primary: #0f172a;
+            --color-bg-secondary: #1e293b;
+            --color-bg-tertiary: #334155;
+            --color-text-primary: #f1f5f9;
+            --color-text-secondary: #cbd5e1;
+            --color-text-muted: #94a3b8;
+            --color-primary: #38bdf8;
+            --color-primary-hover: #0ea5e9;
+            --color-success: #22c55e;
+            --color-warning: #f59e0b;
+            --color-danger: #ef4444;
+            --color-border: #475569;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--color-primary);
+        }
+
+        .subtitle {
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .tariff-info {
+            background: var(--color-bg-secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .tariff-info p {
+            margin: 0.25rem 0;
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+        }
+
+        .layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            flex-grow: 1;
+        }
+
+        .column {
+            background: var(--color-bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .column-header {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .column-header h2 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .time-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge-offpeak {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--color-success);
+        }
+
+        .badge-peak {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--color-danger);
+        }
+
+        .badge-normal {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--color-warning);
+        }
+
+        .rate-info {
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+        }
+
+        .device-list {
+            flex: 1;
+            margin-bottom: 1rem;
+            min-height: 400px;
+        }
+
+        .device-item {
+            background: var(--color-bg-tertiary);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--color-border);
+            transition: all 0.2s;
+        }
+
+        .device-item:hover {
+            border-color: var(--color-primary);
+            transform: translateX(2px);
+        }
+
+        .device-info {
+            flex: 1;
+        }
+
+        .device-name {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            color: var(--color-text-primary);
+        }
+
+        .device-details {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+        }
+
+        .device-energy {
+            text-align: right;
+            margin-right: 0.5rem;
+        }
+
+        .energy-value {
+            font-weight: 600;
+            color: var(--color-primary);
+            font-size: 0.95rem;
+        }
+
+        .cost-value {
+            font-size: 0.85rem;
+            color: var(--color-success);
+        }
+
+        .delete-btn {
+            background: var(--color-danger);
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+
+        .add-device-form {
+            background: var(--color-bg-tertiary);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+        }
+
+        .form-group {
+            margin-bottom: 0.75rem;
+        }
+
+        .row-format {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .row-format .form-group {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .row-format .add-btn {
+            width: auto;
+            min-width: 20%;
+        }
+
+        .form-group:last-of-type {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+            color: var(--color-text-secondary);
+        }
+
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            background: var(--color-bg-primary);
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            color: var(--color-text-primary);
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: var(--color-bg-primary);
+            border-radius: 5px;
+            outline: none;
+            border: 1px solid var(--color-border);
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--color-primary);
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            background: var(--color-primary-hover);
+            transform: scale(1.1);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--color-primary);
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .slider::-moz-range-thumb:hover {
+            background: var(--color-primary-hover);
+            transform: scale(1.1);
+        }
+
+        .add-btn {
+            width: 100%;
+            padding: 0.65rem;
+            background: var(--color-primary);
+            color: var(--color-bg-primary);
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .add-btn:hover {
+            background: var(--color-primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .summary-table th {
+            background: var(--color-bg-tertiary);
+            padding: 0.75rem 0.5rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--color-border);
+            color: var(--color-text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .summary-table td {
+            padding: 0.75rem 0.5rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .summary-table tr:hover {
+            background: var(--color-bg-tertiary);
+        }
+
+        .total-section {
+            background: var(--color-bg-tertiary);
+            padding: 1.25rem;
+            border-radius: 8px;
+            border: 2px solid var(--color-primary);
+        }
+
+        .total-section>input {
+            margin-bottom: 1rem;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .total-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .total-label {
+            font-weight: 500;
+            color: var(--color-text-secondary);
+        }
+
+        .total-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .energy-total {
+            color: var(--color-primary);
+        }
+
+        .cost-total {
+            color: var(--color-success);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 1200px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            body {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ Kerala Energy Calculator</h1>
+            <p class="subtitle">Track your electricity consumption across different tariff periods</p>
+        </header>
+
+        <div class="layout">
+            <div class="column">
+                <div class="grid">
+                    <!-- Off-Peak Period (6 AM - 6 PM) -->
+                    <div class="column">
+                        <div class="column-header">
+                            <span class="time-badge badge-offpeak">Off-Peak</span>
+                            <h2>6 AM - 6 PM</h2>
+                            <p class="rate-info">₹6.84/kWh (10% discount)</p>
+                        </div>
+
+                        <div class="device-list" id="offpeak-list">
+                            <div class="empty-state">No devices added yet</div>
+                        </div>
+
+                        <div class="add-device-form">
+                            <div class="form-group">
+                                <label for="offpeak-name">Device Name</label>
+                                <input type="text" id="offpeak-name" placeholder="e.g., Air Conditioner">
+                            </div>
+                            <div class="form-group">
+                                <label for="offpeak-watt">Power (Watts)</label>
+                                <input type="number" id="offpeak-watt" placeholder="e.g., 1500" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="offpeak-hours">Hours of Operation: <span
+                                        id="offpeak-hours-value">0</span>h</label>
+                                <input type="range" id="offpeak-hours" min="0" max="12" step="0.1" value="0"
+                                    class="slider">
+                            </div>
+                            <button class="add-btn" onclick="addDevice('offpeak')">+ Add Device</button>
+                        </div>
+                    </div>
+
+                    <!-- Peak Period (6 PM - 10 PM) -->
+                    <div class="column">
+                        <div class="column-header">
+                            <span class="time-badge badge-peak">Peak</span>
+                            <h2>6 PM - 10 PM</h2>
+                            <p class="rate-info">₹9.5/kWh (25% surcharge)</p>
+                        </div>
+
+                        <div class="device-list" id="peak-list">
+                            <div class="empty-state">No devices added yet</div>
+                        </div>
+
+                        <div class="add-device-form">
+                            <div class="form-group">
+                                <label for="peak-name">Device Name</label>
+                                <input type="text" id="peak-name" placeholder="e.g., TV">
+                            </div>
+                            <div class="form-group">
+                                <label for="peak-watt">Power (Watts)</label>
+                                <input type="number" id="peak-watt" placeholder="e.g., 150" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="peak-hours">Hours of Operation: <span
+                                        id="peak-hours-value">0</span>h</label>
+                                <input type="range" id="peak-hours" min="0" max="4" step="0.1" value="0" class="slider">
+                            </div>
+                            <button class="add-btn" onclick="addDevice('peak')">+ Add Device</button>
+                        </div>
+                    </div>
+
+                    <!-- Normal Period (10 PM - 6 AM) -->
+                    <div class="column">
+                        <div class="column-header">
+                            <span class="time-badge badge-normal">Normal</span>
+                            <h2>10 PM - 6 AM</h2>
+                            <p class="rate-info">₹7.6/kWh (Normal rate)</p>
+                        </div>
+
+                        <div class="device-list" id="normal-list">
+                            <div class="empty-state">No devices added yet</div>
+                        </div>
+
+                        <div class="add-device-form">
+                            <div class="form-group">
+                                <label for="normal-name">Device Name</label>
+                                <input type="text" id="normal-name" placeholder="e.g., Refrigerator">
+                            </div>
+                            <div class="form-group">
+                                <label for="normal-watt">Power (Watts)</label>
+                                <input type="number" id="normal-watt" placeholder="e.g., 200" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="normal-hours">Hours of Operation: <span
+                                        id="normal-hours-value">0</span>h</label>
+                                <input type="range" id="normal-hours" min="0" max="8" step="0.1" value="0"
+                                    class="slider">
+                            </div>
+                            <button class="add-btn" onclick="addDevice('normal')">+ Add Device</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h2 style="margin-bottom: 1rem;">Add device that works all day</h2>
+                    <div class="add-device-form row-format">
+                        <div class="form-group">
+                            <label for="full-day-name">Device Name</label>
+                            <input type="text" id="full-day-name" placeholder="e.g., Refrigerator">
+                        </div>
+                        <div class="form-group">
+                            <label for="full-day-watt">Power (Watts)</label>
+                            <input type="number" id="full-day-watt" placeholder="e.g., 200" step="0.01">
+                        </div>
+                        <button class="add-btn" onclick="addDevice('full-day')">+ Add Device</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Summary Column -->
+            <div class="column">
+                <div class="column-header">
+                    <h2>📊 Summary</h2>
+                    <p class="rate-info">Consolidated daily usage</p>
+                </div>
+
+                <div style="flex: 1; overflow-y: auto;">
+                    <table class="summary-table">
+                        <thead>
+                            <tr>
+                                <th>Device</th>
+                                <th>Energy (kWh)</th>
+                                <th>Cost (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="summary-body">
+                            <tr>
+                                <td colspan="3" class="empty-state">Add devices to see summary</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="total-section">
+                    <input type="range" id="total-days-slider" min="1" max="30" step="1" value="1" class="slider">
+                    <div class="total-row">
+                        <span class="total-label">Total Days:</span>
+                        <span class="total-value days-total" id="total-days">1 Day</span>
+                    </div>
+                    <div class="total-row">
+                        <span class="total-label">Total Energy:</span>
+                        <span class="total-value energy-total" id="total-energy">0.00 kWh</span>
+                    </div>
+                    <div class="total-row">
+                        <span class="total-label">Total Cost:</span>
+                        <span class="total-value cost-total" id="total-cost">₹0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const RATES = {
+            offpeak: 6.84,  // 10% less than 7.6
+            peak: 9.5,      // 25% more than 7.6
+            normal: 7.6     // Normal rate
+        };
+
+        const devices = {
+            offpeak: [],
+            peak: [],
+            normal: []
+        };
+
+        function updateSliderValue(period) {
+            const slider = document.getElementById(`${period}-hours`);
+            const valueDisplay = document.getElementById(`${period}-hours-value`);
+            valueDisplay.textContent = slider.value;
+        }
+
+        function addDevice(period) {
+            const name = document.getElementById(`${period}-name`).value.trim();
+            const watt = parseFloat(document.getElementById(`${period}-watt`).value);
+            const hours = period == 'full-day' ? 24 : parseFloat(document.getElementById(`${period}-hours`).value);
+
+            if (!name || isNaN(watt) || isNaN(hours) || watt <= 0 || hours <= 0) {
+                alert('Please fill in all fields with valid values');
+                return;
+            }
+
+            if (hours === 24) {
+                devices['normal'].push({
+                    id: Date.now(),
+                    name: name,
+                    watt: watt,
+                    hours: 8,
+                    period: 'normal'
+                });
+                devices['peak'].push({
+                    id: Date.now(),
+                    name: name,
+                    watt: watt,
+                    hours: 4,
+                    period: 'peak'
+                });
+                devices['offpeak'].push({
+                    id: Date.now(),
+                    name: name,
+                    watt: watt,
+                    hours: 12,
+                    period: 'offpeak'
+                });
+            } else {
+                devices[period].push({
+                    id: Date.now(),
+                    name: name,
+                    watt: watt,
+                    hours: hours,
+                    period: period
+                });
+            }
+
+            // Clear form
+            document.getElementById(`${period}-name`).value = '';
+            document.getElementById(`${period}-watt`).value = '';
+            if (hours !== 24) {
+                document.getElementById(`${period}-hours`).value = '0';
+                updateSliderValue(period);
+            }
+
+            renderDevices();
+            updateSummary();
+        }
+
+        function deleteDevice(period, id) {
+            devices[period] = devices[period].filter(d => d.id !== id);
+            renderDevices();
+            updateSummary();
+        }
+
+        function renderDevices() {
+            ['offpeak', 'peak', 'normal'].forEach(period => {
+                const listEl = document.getElementById(`${period}-list`);
+
+                if (devices[period].length === 0) {
+                    listEl.innerHTML = '<div class="empty-state">No devices added yet</div>';
+                    return;
+                }
+
+                listEl.innerHTML = devices[period].map(device => {
+                    const kwh = (device.watt * device.hours) / 1000;
+                    const cost = kwh * RATES[period];
+
+                    return `
+                        <div class="device-item">
+                            <div class="device-info">
+                                <div class="device-name">${device.name}</div>
+                                <div class="device-details">${device.watt}W × ${device.hours}h</div>
+                            </div>
+                            <div class="device-energy">
+                                <div class="energy-value">${kwh.toFixed(2)} kWh</div>
+                                <div class="cost-value">₹${cost.toFixed(2)}</div>
+                            </div>
+                            <button class="delete-btn" onclick="deleteDevice('${period}', ${device.id})">×</button>
+                        </div>
+                    `;
+                }).join('');
+            });
+        }
+
+        function updateSummary() {
+            const summaryBody = document.getElementById('summary-body');
+            const allDevices = [
+                ...devices.offpeak,
+                ...devices.peak,
+                ...devices.normal
+            ];
+
+            if (allDevices.length === 0) {
+                summaryBody.innerHTML = '<tr><td colspan="3" class="empty-state">Add devices to see summary</td></tr>';
+                document.getElementById('total-energy').textContent = '0.00 kWh';
+                document.getElementById('total-cost').textContent = '₹0.00';
+                return;
+            }
+
+            // Aggregate devices by name
+            const aggregated = {};
+            allDevices.forEach(device => {
+                const kwh = (device.watt * device.hours) / 1000;
+                const cost = kwh * RATES[device.period];
+
+                if (!aggregated[device.name]) {
+                    aggregated[device.name] = {
+                        name: device.name,
+                        totalKwh: 0,
+                        totalCost: 0
+                    };
+                }
+
+                aggregated[device.name].totalKwh += kwh;
+                aggregated[device.name].totalCost += cost;
+            });
+
+            // Render summary table
+            summaryBody.innerHTML = Object.values(aggregated).map(item => `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>${item.totalKwh.toFixed(2)}</td>
+                    <td>₹${item.totalCost.toFixed(2)}</td>
+                </tr>
+            `).join('');
+
+            // Calculate totals
+            let totalEnergy = 0;
+            let totalCost = 0;
+            const totalDays = parseInt(document.getElementById('total-days-slider').value);
+
+            Object.values(aggregated).forEach(item => {
+                totalEnergy += item.totalKwh * totalDays;
+                totalCost += item.totalCost * totalDays;
+            });
+
+            document.getElementById('total-energy').textContent = `${totalEnergy.toFixed(2)} kWh`;
+            document.getElementById('total-cost').textContent = `₹${totalCost.toFixed(2)}`;
+        }
+
+        // Initialize slider value displays and event listeners
+        ['offpeak', 'peak', 'normal'].forEach(period => {
+            // Update slider display on change
+            document.getElementById(`${period}-hours`).addEventListener('input', () => {
+                updateSliderValue(period);
+            });
+
+            // Initialize slider value
+            updateSliderValue(period);
+
+            // Allow Enter key to submit forms
+            ['name', 'watt'].forEach(field => {
+                document.getElementById(`${period}-${field}`).addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        addDevice(period);
+                    }
+                });
+            });
+        });
+
+
+        document.getElementById(`total-days-slider`).addEventListener('input', () => {
+            const days = parseInt(document.getElementById('total-days-slider').value);
+            document.getElementById('total-days').textContent = `${days} ${days === 1 ? 'Day' : 'Days'}`;
+            updateSummary();
+        });
+    </script>
+</body>
+
+</html>
